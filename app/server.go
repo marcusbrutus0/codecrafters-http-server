@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	// Uncomment this block to pass the first stage
 	"net"
 	"os"
@@ -49,8 +50,26 @@ func HandleFunc(l net.Listener, data []byte) {
 
 	if pathval == "/" {
 		c.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	} else if strings.HasPrefix(pathval, "/echo") {
+		//splitting pathval by slash
+		// /echo/abc -> ["", "echo","abc"]
+		// i'm interested in index 2
+		parts := strings.Split(pathval, "/")
+		randStr := parts[2]
+
+		contentLength := len(randStr)
+		contentLengthStr := fmt.Sprintf("%d", contentLength)
+		/*
+			HTTP/1.1 200 OK
+			Content-Type: text/plain
+			Content-Length: 3
+
+			abc
+		*/
+		c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + contentLengthStr + "\r\n\r\n" + randStr))
+
 	} else {
 		c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
-	c.Close()
+
 }
