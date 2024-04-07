@@ -19,6 +19,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	data := make([]byte, 1024)
+
 	for {
 		c, err := l.Accept()
 		if err != nil {
@@ -26,7 +28,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		data := make([]byte, 1024)
 		_, err = c.Read(data)
 		if err != nil {
 			fmt.Println("Failed to read data: ", err.Error())
