@@ -66,6 +66,13 @@ func HandleFunc(l net.Listener, data []byte) {
 		*/
 		c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + contentLengthStr + "\r\n\r\n" + randStr))
 
+	} else if pathval == "/user-agent" {
+		usrAgentString := lines[2][12:]
+		result := len(usrAgentString)
+		res := fmt.Sprintf("%d", result)
+
+		c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + res + "\r\n\r\n" + usrAgentString))
+
 	} else {
 		c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
