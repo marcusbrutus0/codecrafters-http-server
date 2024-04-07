@@ -51,11 +51,9 @@ func HandleFunc(l net.Listener, data []byte) {
 	if pathval == "/" {
 		c.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	} else if strings.HasPrefix(pathval, "/echo") {
-		//splitting pathval by slash
-		// /echo/abc -> ["", "echo","abc"]
-		// i'm interested in index 2
-		parts := strings.Split(pathval, "/")
-		randStr := parts[2]
+		//trimming pathval by slash
+		// /echo/abc/hugr -> abc/hugr
+		randStr := strings.TrimPrefix(pathval, "/echo/")
 
 		contentLength := len(randStr)
 		contentLengthStr := fmt.Sprintf("%d", contentLength)
