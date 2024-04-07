@@ -5,6 +5,7 @@ import (
 	// Uncomment this block to pass the first stage
 	"net"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -22,19 +23,34 @@ func main() {
 	data := make([]byte, 1024)
 
 	for {
-		c, err := l.Accept()
-		if err != nil {
-			fmt.Println("Error accepting connection: ", err.Error())
-			os.Exit(1)
-		}
+		HandleFunc(l, data)
+	}
+}
 
-		_, err = c.Read(data)
-		if err != nil {
-			fmt.Println("Failed to read data: ", err.Error())
-			os.Exit(1)
-		}
+func HandleFunc(l net.Listener, data []byte) {
 
-		c.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	c, err := l.Accept()
+	if err != nil {
+		fmt.Println("Error accepting connection: ", err.Error())
+		os.Exit(1)
 	}
 
+	defer c.Close()
+
+	_, err = c.Read(data)
+	if err != nil {
+		fmt.Println("Failed to read data: ", err.Error())
+		os.Exit(1)
+	}
+
+	lines := strings.Split(string(data), "\r\n")
+
+	pathval := strings.Split(lines[0], " ")[1]
+
+	if pathval == "/" {
+		c.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	} else {
+		c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	}
+	c.Close()
 }
