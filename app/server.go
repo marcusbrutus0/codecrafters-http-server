@@ -21,24 +21,24 @@ func main() {
 		os.Exit(1)
 	}
 
-	data := make([]byte, 1024)
-
 	for {
-		HandleFunc(l, data)
+		c, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+
+		go HandleFunc(c)
 	}
 }
 
-func HandleFunc(l net.Listener, data []byte) {
+func HandleFunc(c net.Conn) {
 
-	c, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
-	}
+	data := make([]byte, 1024)
 
 	defer c.Close()
 
-	_, err = c.Read(data)
+	_, err := c.Read(data)
 	if err != nil {
 		fmt.Println("Failed to read data: ", err.Error())
 		os.Exit(1)
