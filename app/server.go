@@ -4,12 +4,19 @@ import (
 	"fmt"
 
 	// Uncomment this block to pass the first stage
+	"flag"
 	"net"
 	"os"
 	"strings"
 )
 
+var directory = flag.String("directory", "CurrentDirectory", "Serves the files from this directory")
+
 func main() {
+
+	flag.Parse()
+
+	fmt.Println("the given directory is" + *directory)
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
@@ -60,8 +67,8 @@ func HandleFunc(c net.Conn) {
 		/*
 			HTTP/1.1 200 OK
 			Content-Type: text/plain
-			Content-Length: 3
 
+			Content-Length: 3
 			abc
 		*/
 		c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + contentLengthStr + "\r\n\r\n" + randStr))
@@ -72,6 +79,33 @@ func HandleFunc(c net.Conn) {
 		res := fmt.Sprintf("%d", result)
 
 		c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + res + "\r\n\r\n" + usrAgentString))
+
+	} else if strings.HasPrefix(pathval, "/files") {
+		fileName := strings.TrimPrefix(pathval, "/files/")
+
+		filePath := *directory + "/" + fileName
+
+		_, err := os.Stat(filePath)
+		if err != nil {
+			fmt.Println("no file found in given directory ", filePath)
+			c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+			return
+
+		} else {
+			readFile, err := os.ReadFile(filePath)
+			if err != nil {
+				fmt.Println("file found in given directory ", err)
+				c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+				return
+			}
+
+			readFileLength := len(readFile)
+			readFileBody := string(readFile)
+			readFileLengthStr := fmt.Sprintf("%d", readFileLength)
+
+			c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + readFileLengthStr + "\r\n\r\n" + readFileBody))
+
+		}
 
 	} else {
 		c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
