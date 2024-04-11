@@ -41,7 +41,7 @@ func main() {
 
 func HandleFunc(c net.Conn) {
 
-	data := make([]byte, 1024)
+	data := make([]byte, 1000000)
 
 	defer c.Close()
 
@@ -85,25 +85,64 @@ func HandleFunc(c net.Conn) {
 
 		filePath := *directory + "/" + fileName
 
-		_, err := os.Stat(filePath)
-		if err != nil {
-			fmt.Println("no file found in given directory ", filePath)
-			c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-			return
+		switch method := lines[0]; method {
+		case "POST":
 
-		} else {
-			readFile, err := os.ReadFile(filePath)
+			_, err := os.Stat(filePath)
 			if err != nil {
-				fmt.Println("file found in given directory ", err)
+				fmt.Println("no file found in given directory ", filePath)
 				c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 				return
 			}
 
-			readFileLength := len(readFile)
-			readFileBody := string(readFile)
-			readFileLengthStr := fmt.Sprintf("%d", readFileLength)
+			/* Get the index of the first string line which is empty
+			   and the post request body is next line onwards
+			*/
 
-			c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + readFileLengthStr + "\r\n\r\n" + readFileBody))
+			indexOfReqBody := 0
+			for index, line := range lines {
+				if line == "" {
+					indexOfReqBody = index + 1
+				}
+			}
+
+			fileData := ""
+			for i := indexOfReqBody; i <= (len(lines) - 1); i++ {
+				fileData += lines[i]
+				fileData += "\r\n"
+
+				if i != (len(lines) - 1) {
+					fileData += "\r\n"
+				}
+
+			}
+
+			os.WriteFile(fileName, []byte(fileData), 0666)
+			c.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
+			fmt.Println("Changes to file saved")
+
+		case "GET":
+			_, err := os.Stat(filePath)
+			if err != nil {
+				fmt.Println("no file found in given directory ", filePath)
+				c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+				return
+
+			} else {
+				readFile, err := os.ReadFile(filePath)
+				if err != nil {
+					fmt.Println("file found in given directory ", err)
+					c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+					return
+				}
+
+				readFileLength := len(readFile)
+				readFileBody := string(readFile)
+				readFileLengthStr := fmt.Sprintf("%d", readFileLength)
+
+				c.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + readFileLengthStr + "\r\n\r\n" + readFileBody))
+
+			}
 
 		}
 
