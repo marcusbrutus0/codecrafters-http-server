@@ -90,13 +90,6 @@ func HandleFunc(c net.Conn) {
 		switch method {
 		case "POST":
 
-			_, err := os.Stat(filePath)
-			if err != nil {
-				fmt.Println("no file found in given directory ", filePath)
-				c.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-				return
-			}
-
 			/* Get the index of the first string line which is empty
 			   and the post request body is next line onwards
 			*/
