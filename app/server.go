@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 
 	// Uncomment this block to pass the first stage
@@ -102,8 +103,9 @@ func HandleFunc(c net.Conn) {
 			}
 
 			fileData := lines[indexOfReqBody]
+			fileDataBytes := bytes.Trim([]byte(fileData), "\x00")
 
-			os.WriteFile(filePath, []byte(fileData), 0666)
+			os.WriteFile(filePath, fileDataBytes, 0666)
 			c.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
 			fmt.Println("Changes to file saved")
 
