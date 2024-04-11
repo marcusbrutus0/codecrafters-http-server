@@ -101,16 +101,7 @@ func HandleFunc(c net.Conn) {
 				}
 			}
 
-			fileData := ""
-			for i := indexOfReqBody; i <= (len(lines) - 1); i++ {
-				fileData += lines[i]
-				fileData += "\r\n"
-
-				if i != (len(lines) - 1) {
-					fileData += "\r\n"
-				}
-
-			}
+			fileData := lines[indexOfReqBody]
 
 			os.WriteFile(filePath, []byte(fileData), 0666)
 			c.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
