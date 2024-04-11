@@ -55,6 +55,7 @@ func HandleFunc(c net.Conn) {
 
 	splitStrings := strings.Split(lines[0], " ")
 	pathval := splitStrings[1]
+	method := splitStrings[0]
 
 	if pathval == "/" {
 		c.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
@@ -86,7 +87,7 @@ func HandleFunc(c net.Conn) {
 
 		filePath := *directory + "/" + fileName
 		// ["get", "/file", "/filename/"]
-		switch method := pathval; method {
+		switch method {
 		case "POST":
 
 			_, err := os.Stat(filePath)
