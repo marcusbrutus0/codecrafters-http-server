@@ -112,7 +112,7 @@ func HandleFunc(c net.Conn) {
 
 			}
 
-			os.WriteFile(fileName, []byte(fileData), 0666)
+			os.WriteFile(filePath, []byte(fileData), 0666)
 			c.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
 			fmt.Println("Changes to file saved")
 
